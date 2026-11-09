@@ -1,0 +1,35 @@
+*** C:\ESP32-CSI-Tool\_components\sockets_component.h
+--- Fix active_sta packet timing for ESP-IDF/FreeRTOS tick rates other than 1000 Hz
+
+Find this block:
+
+#if defined CONFIG_PACKET_RATE && (CONFIG_PACKET_RATE > 0)
+            double wait_duration = (1000.0 / CONFIG_PACKET_RATE) - lag;
+            int w = floor(wait_duration);
+            vTaskDelay(w);
+#else
+            vTaskDelay(10); // This limits TX to approximately 100 per second.
+#endif
+
+Replace it with:
+
+#if defined CONFIG_PACKET_RATE && (CONFIG_PACKET_RATE > 0)
+            double wait_duration = (1000.0 / CONFIG_PACKET_RATE) - lag;
+            int wait_ms = floor(wait_duration);
+            if (wait_ms < 1) {
+                wait_ms = 1;
+            }
+
+            TickType_t wait_ticks = pdMS_TO_TICKS(wait_ms);
+            if (wait_ticks < 1) {
+                wait_ticks = 1;
+            }
+            vTaskDelay(wait_ticks);
+#else
+            vTaskDelay(pdMS_TO_TICKS(10));
+#endif
+
+Why:
+vTaskDelay() accepts FreeRTOS ticks, not milliseconds. With CONFIG_FREERTOS_HZ=100,
+the old vTaskDelay(40) sleeps about 400 ms, so PACKET_RATE=25 becomes about
+2.5 packets/s. pdMS_TO_TICKS(40) converts 40 ms to the correct number of ticks.

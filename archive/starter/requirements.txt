@@ -1,0 +1,5 @@
+numpy>=2.2
+matplotlib>=3.10
+pyserial>=3.5
+scikit-learn>=1.9
+joblib>=1.4

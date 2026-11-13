@@ -39,6 +39,10 @@ list is explicit. Do not compare its newly trained score directly with the old
 | `generic` | Existing augmentation + independent spectral offsets with matched learned marginal variance, link gains and correlated temporal noise |
 | `session` | Existing augmentation + low-rank joint spectral/link offsets, link gains and correlated temporal noise |
 
+Use the updated per-session scoring flag shown below; an earlier starter
+example used a shared exclusion that was unsuitable for the verified S9
+protocol. Existing prepared caches can be reused unchanged.
+
 The primary practical comparison is `session` versus `existing`. `session`
 versus `generic` probes the value of learned joint spectral/link structure.
 This first control does not separately isolate session persistence or temporal
@@ -125,13 +129,18 @@ parser problems. Audit and resolve those first.
 ## 3. First development run: check the pipeline on historical data
 
 ```powershell
-.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-trials 1 2 --epochs 10 --seeds 2026 --strengths 1 --output .\results\session_robustness_pilot_v1
+.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-by-session "S8:1,2" --epochs 10 --seeds 2026 --strengths 1 --output .\results\session_robustness_pilot_v1
 ```
 
-The explicit occupied-trial exclusion preserves the historical S8/S9 scoring
-partition **only if** occupied trials 1 and 2 really were their calibration
-recordings. Review the inventory first. These excluded occupied trials are not
-used for generator fitting, background estimation or target prototypes.
+The verified inventory has 59 S8 recordings: two reserved occupied trials
+per zone, four occupied evaluation trials per zone, and five Empty recordings.
+S9 has 41 recordings: four occupied trials per zone and five Empty recordings.
+The session-specific flag excludes occupied trials 1-2 **only in S8**. All four
+occupied trials in S9 remain scored. After excluding each dedicated Empty
+reference, this gives 40 scored trials per session. A shared exclusion of
+trials 1-2 would incorrectly drop valid S9 trials. These excluded occupied
+trials are not used for generator fitting, background estimation or target
+prototypes. This reflects the historical protocol, not a rule for new sessions.
 
 S8 and S9 have already been inspected. For this extension they are development
 benchmarks, not new untouched tests. A new score on them cannot retroactively
@@ -141,7 +150,7 @@ The 10-epoch run is a pipeline check, not an epoch recommendation or final
 comparison. After checking the outputs, run a planned matched comparison:
 
 ```powershell
-.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-trials 1 2 --epochs 70 --seeds 2026 2027 2028 --strengths 0.5 1 1.5 --output .\results\session_robustness_development_v1
+.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-by-session "S8:1,2" --epochs 70 --seeds 2026 2027 2028 --strengths 0.5 1 1.5 --output .\results\session_robustness_development_v1
 ```
 
 No routine uses occupied evaluation data for fitting. Generator parameters and

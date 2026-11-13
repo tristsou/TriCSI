@@ -163,6 +163,29 @@ def summaries(frame):
         seeds=("seed", "nunique")).reset_index()
 
 
+def resolve_exclusions(sessions, shared=(), per_session=()):
+    """Resolve explicit protocol exclusions without assuming equal trial numbering."""
+    if shared and per_session:
+        raise ValueError("Use shared exclusions OR per-session exclusions, not both.")
+    if any(n <= 0 for n in shared) or len(shared) != len(set(shared)):
+        raise ValueError("Excluded trial numbers must be unique positive integers.")
+    result = {s: list(shared) for s in sessions}
+    seen = set()
+    for spec in per_session:
+        try:
+            name, numbers = spec.split(":", 1)
+            values = [int(n) for n in numbers.split(",")] if numbers else []
+        except (ValueError, AttributeError) as exc:
+            raise ValueError(f"Invalid exclusion {spec!r}; use e.g. S8:1,2") from exc
+        if name not in result or name in seen:
+            raise ValueError(f"Unknown or duplicate exclusion session {name!r}")
+        if any(n <= 0 for n in values) or len(values) != len(set(values)):
+            raise ValueError(f"Invalid excluded trial numbers in {spec!r}")
+        result[name] = values
+        seen.add(name)
+    return result
+
+
 def develop(args):
     from .model import load_anchor, predict_trials, save_checkpoint, source_prototypes, train
     import torch
@@ -184,11 +207,15 @@ def develop(args):
     source_sets, calibration_sets = zip(*(calibrate(raw[s]) for s in args.train))
     source, calibration = combine(source_sets), combine(calibration_sets)
     require_all_classes(source)
+    exclusions = resolve_exclusions(args.dev, args.exclude_dev_occupied_trials,
+                                    getattr(args, "exclude_dev_occupied_by_session", []))
     targets = {}
     for session in args.dev:
         assert_disjoint(source, raw[session])
-        targets[session], _ = calibrate(raw[session], args.exclude_dev_occupied_trials)
+        targets[session], _ = calibrate(raw[session], exclusions[session])
         require_all_classes(targets[session])
+        print(f"Scoring {session}: {len(set(targets[session].group.astype(str)))} whole trials; "
+              f"occupied exclusions={exclusions[session]}; Empty trial 1 excluded", flush=True)
     generator = SessionGenerator.fit(source, calibration)
     args.output.mkdir(parents=True, exist_ok=False)
     checkpoints = args.output / "checkpoints"
@@ -198,6 +225,7 @@ def develop(args):
               "methods": args.methods, "strengths": args.strengths, "seeds": args.seeds,
               "epochs": args.epochs, "batch_size": args.batch_size, "lr": args.lr,
               "exclude_dev_occupied_trials": args.exclude_dev_occupied_trials,
+              "development_trial_exclusions": exclusions,
               "source_trials": len(set(source.group.astype(str))), "source_windows": len(source.X),
               "source_calibration_trials": len(set(calibration.group.astype(str))),
               "cache_sha256": {s: sha(args.cache_dir / f"{s}.npz") for s in raw},
@@ -317,7 +345,9 @@ def evaluate(args):
     for session in raw:
         if sha(args.cache_dir / f"{session}.npz") in config["cache_sha256"].values():
             raise ValueError("Evaluation cache duplicates a development/source cache.")
-    targets = {s: calibrate(r, args.exclude_occupied_trials)[0] for s, r in raw.items()}
+    exclusions = resolve_exclusions(args.sessions, args.exclude_occupied_trials,
+                                    getattr(args, "exclude_occupied_by_session", []))
+    targets = {s: calibrate(r, exclusions[s])[0] for s, r in raw.items()}
     for target in targets.values():
         require_all_classes(target)
     anchor = load_anchor(args.project_root)
@@ -347,6 +377,7 @@ def evaluate(args):
     write_json(args.output / "evaluation_receipt.json", {"fitting_performed": False,
         "bundle_manifest_sha256": sha(args.bundle / "frozen_manifest.json"),
         "sessions": args.sessions, "exclude_occupied_trials": args.exclude_occupied_trials,
+        "evaluation_trial_exclusions": exclusions,
         "cache_sha256": {s: sha(args.cache_dir / f"{s}.npz") for s in raw},
         "note": "Report each day. Seeds and overlapping windows are not independent recording sessions."})
     plot_results(frame, args.output)
@@ -396,6 +427,8 @@ def parser():
     dev.add_argument("--lr", type=float, default=.001)
     dev.add_argument("--threads", type=int, default=2)
     dev.add_argument("--exclude-dev-occupied-trials", nargs="*", type=int, default=[])
+    dev.add_argument("--exclude-dev-occupied-by-session", nargs="+", default=[],
+                     help="Session-specific exclusions, e.g. 'S8:1,2'; unspecified sessions keep every occupied trial")
     dev.set_defaults(func=develop)
     fr = sub.add_parser("freeze", help="Copy selected fitted models; no retraining")
     fr.add_argument("--development-run", type=Path, required=True)
@@ -408,6 +441,8 @@ def parser():
     ev.add_argument("--output", type=Path, required=True)
     ev.add_argument("--threads", type=int, default=2)
     ev.add_argument("--exclude-occupied-trials", nargs="*", type=int, default=[])
+    ev.add_argument("--exclude-occupied-by-session", nargs="+", default=[],
+                    help="Session-specific exclusions, e.g. 'S8:1,2'; unspecified sessions keep every occupied trial")
     ev.set_defaults(func=evaluate)
     return p
 

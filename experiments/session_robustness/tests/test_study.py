@@ -11,14 +11,14 @@ import numpy as np
 from experiments.session_robustness.data import (LABELS, Windows, assert_disjoint,
     calibrate, combine, load_windows, read_sessions, save_windows)
 from experiments.session_robustness.generator import SessionGenerator
-from experiments.session_robustness.study import ROOT, audit_trial, develop, evaluate, freeze, prepare
+from experiments.session_robustness.study import ROOT, audit_trial, develop, evaluate, freeze, prepare, resolve_exclusions
 
 
-def fixture(session, seed):
+def fixture(session, seed, occupied_trials=1, empty_trials=2):
     rng = np.random.default_rng(seed)
     records = []
     for label in LABELS:
-        trials = [1, 2] if label == "EMPTY" else [1]
+        trials = range(1, empty_trials + 1) if label == "EMPTY" else range(1, occupied_trials + 1)
         for trial in trials:
             for window in range(2):
                 profile = 2 + 0.1 * np.sin(np.arange(64) / 8 + seed)
@@ -63,6 +63,22 @@ class DataTests(unittest.TestCase):
     def test_overlap_rejected(self):
         with self.assertRaises(ValueError):
             assert_disjoint(fixture("A", 1), fixture("A", 2))
+
+    def test_s8_s9_different_protocols_both_score_40(self):
+        policy = resolve_exclusions(["S8", "S9"], per_session=["S8:1,2"])
+        s8, _ = calibrate(fixture("S8", 1, occupied_trials=6, empty_trials=5), policy["S8"])
+        s9, _ = calibrate(fixture("S9", 2, occupied_trials=4, empty_trials=5), policy["S9"])
+        self.assertEqual(len(set(s8.group)), 40)
+        self.assertEqual(len(set(s9.group)), 40)
+        self.assertTrue(np.all(s8.trial_number[s8.y_text != "EMPTY"] >= 3))
+        self.assertEqual(set(s9.trial_number[s9.y_text != "EMPTY"]), {1, 2, 3, 4})
+
+    def test_invalid_exclusion_policies_rejected(self):
+        for specs in (["S10:1,2"], ["S8:1", "S8:2"], ["S8:0"], ["S8:1,1"], ["S8:bad"]):
+            with self.assertRaises(ValueError):
+                resolve_exclusions(["S8", "S9"], per_session=specs)
+        with self.assertRaises(ValueError):
+            resolve_exclusions(["S8"], shared=[1, 2], per_session=["S8:1,2"])
 
     def test_raw_width_and_iq_range_audit(self):
         with tempfile.TemporaryDirectory() as folder:

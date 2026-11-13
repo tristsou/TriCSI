@@ -4,6 +4,12 @@ TriCSI is a Wi-Fi channel state information (CSI) research project using ESP32-S
 
 Start in [`workflows/`](workflows/). The scripts there have descriptive names and run the original source with the same arguments, so older commands and source verification checks still work.
 
+The new [session-robustness experiment](experiments/session_robustness/README.md)
+adds source-informed CSI generation and matched comparisons using all eligible
+source trials and the existing two-link neural architecture. Start with its
+read-only inventory command. It is an experimental extension; no raw recordings
+or evidence of improved accuracy are included.
+
 | Task | Script | Guide |
 | --- | --- | --- |
 | Collect two-link development trials | [`collect_two_link_anchor_trials.py`](workflows/collect_two_link_anchor_trials.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |

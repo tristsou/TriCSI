@@ -1,5 +1,9 @@
 # Zone-confusion diagnostics and the background-shape experiment
 
+For the S4-S7 historical reconstruction and matched comparison, follow
+[START_S4_S7.md](START_S4_S7.md). It adds only S7 to the cache and preserves
+the existing S4-S6 experiments.
+
 This is an additive package. It does not edit the original collection, training,
 calibration or evaluation scripts, or the `experiments/session_robustness` package.
 Use the existing version-3 environment and caches. No new recordings are needed

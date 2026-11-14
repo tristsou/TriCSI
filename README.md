@@ -10,6 +10,10 @@ source trials and the existing two-link neural architecture. Start with its
 read-only inventory command. It is an experimental extension; no raw recordings
 or evidence of improved accuracy are included.
 
+The [zone-confusion diagnostics](experiments/session_diagnostics/README.md) inspect
+measured CSI, saved embeddings and trial metadata, and compare the original shape
+channels with Empty-relative shape channels under a matched training schedule.
+
 | Task | Script | Guide |
 | --- | --- | --- |
 | Collect two-link development trials | [`collect_two_link_anchor_trials.py`](workflows/collect_two_link_anchor_trials.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |

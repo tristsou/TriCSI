@@ -22,7 +22,9 @@ student review and experimental validation.
 - The existing two-link TriCSI-Anchor encoders, fusion, occupancy head and losses.
 - All eligible real training windows/trials; no random trial subsampling.
 - Real-source-only normalization and source-only location prototypes.
-- The same model initialization seed, minibatch order, epochs and update counts.
+- The same initialization seed, minibatch order, maximum epochs, validation
+  schedule and optimizer-update budget. Each method may select a different
+  development-best epoch within that common budget.
 - Network and link dropout settings in every condition.
 - The same dedicated Empty trial 1 for per-session background calibration.
 - The same evaluation trials and whole-trial aggregation across conditions.
@@ -150,16 +152,36 @@ The 10-epoch run is a pipeline check, not an epoch recommendation or final
 comparison. After checking the outputs, run a planned matched comparison:
 
 ```powershell
-.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-by-session "S8:1,2" --epochs 70 --seeds 2026 2027 2028 --strengths 0.5 1 1.5 --output .\results\session_robustness_development_v1
+.\.venv\Scripts\python.exe -m experiments.session_robustness develop --cache-dir .\outputs\session_cache_v1 --train S4 S5 S6 --dev S8 S9 --exclude-dev-occupied-by-session "S8:1,2" --epochs 150 --eval-every 5 --seeds 2026 2027 2028 --strengths 0.5 1 1.5 --output .\results\session_robustness_development_v3
 ```
 
 No routine uses occupied evaluation data for fitting. Generator parameters and
 normalization are fitted only on source sessions. Development labels select
-strength, which is why these sessions are not confirmatory tests. Choose the
-epoch budget before this comparison or treat further changes as development.
+strength, which is why these sessions are not confirmatory tests. Choose the maximum epoch budget and checkpoint interval before the run. This
+version evaluates epoch 1, every fifth epoch by default, and the final epoch.
+Each candidate is evaluated in inference mode on all declared development
+sessions using source-only prototypes. Validation restores the PyTorch RNG
+state, so inference does not alter the next training updates.
+
+The selected checkpoint maximizes the **lowest development-session accuracy**,
+then mean session accuracy, then mean macro-F1. Exact ties retain the earlier
+epoch. One checkpoint must serve S8 and S9 together: do not choose a separate
+best epoch for each session. Every condition still runs the full maximum epoch
+budget; selected checkpoints may have different epoch numbers. This is best
+development-checkpoint selection, not test-set selection or early termination.
+
+Earlier versions scored only the final epoch. Preserve those outputs as earlier
+development results; do not silently replace them. Start a new run with this
+version. Cached input windows remain usable without preprocessing again.
 
 Outputs include `generator.json`, `run_config.json`, per-trial development
-predictions, per-session metrics, checkpoints and a summary. Rank settings by
+predictions, per-session metrics, selected checkpoints and a summary. The
+`learning_curves.csv` file records training loss and each development-session
+score at every checked epoch. `selected_epoch` appears in checkpoint metadata,
+`checkpoint_index.json`, metrics and predictions. All checkpoints are trained
+from scratch; older files did not preserve optimizer state for exact resumption.
+
+Rank settings by
 the mean across seeds of each seed's worst-session accuracy, followed by mean
 session accuracy and macro-F1; exact ties prefer lower strength, with stable
 method order. The summary averages each session equally.
@@ -167,11 +189,11 @@ method order. The summary averages each session equally.
 ## 4. Freeze before new real evaluation
 
 ```powershell
-.\.venv\Scripts\python.exe -m experiments.session_robustness freeze --development-run .\results\session_robustness_development_v1 --output .\models\session_robustness_frozen_v1
+.\.venv\Scripts\python.exe -m experiments.session_robustness freeze --development-run .\results\session_robustness_development_v3 --output .\models\session_robustness_frozen_v3
 ```
 
 This copies the best development strength for each condition and all its seed
-checkpoints. It does not refit. Code and checkpoint hashes are verified.
+development-selected epoch checkpoints. It does not refit. Code and checkpoint hashes are verified.
 
 ## 5. Small fresh evaluation only after freezing
 
@@ -185,7 +207,7 @@ After collecting with a compatible collector:
 
 ```powershell
 .\.venv\Scripts\python.exe -m experiments.session_robustness prepare --raw-dir .\data\raw --sessions R1 R2 --cache-dir .\outputs\session_cache_v1
-.\.venv\Scripts\python.exe -m experiments.session_robustness evaluate --bundle .\models\session_robustness_frozen_v1 --cache-dir .\outputs\session_cache_v1 --sessions R1 R2 --output .\results\session_robustness_test_v1
+.\.venv\Scripts\python.exe -m experiments.session_robustness evaluate --bundle .\models\session_robustness_frozen_v3 --cache-dir .\outputs\session_cache_v1 --sessions R1 R2 --output .\results\session_robustness_test_v1
 ```
 
 Do not use the historical occupied-trial exclusion for fresh sessions unless
@@ -216,7 +238,8 @@ comparisons are exploratory, not multiple confirmatory discoveries.
 
 Tests use artificial fixtures to check shapes, deterministic generation,
 non-mutation, calibration separation, leakage rejection, matched update counts,
-and the full neural train/freeze/evaluate path. Their printed accuracies are
+joint checkpoint ranking, restoration of an earlier selected epoch, preservation
+of training RNG across validation, and the full neural train/freeze/evaluate path. Their printed accuracies are
 **software-test outputs, not TriCSI research results**. Temporary files are
 removed after tests.
 

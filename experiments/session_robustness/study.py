@@ -186,6 +186,19 @@ def resolve_exclusions(sessions, shared=(), per_session=()):
     return result
 
 
+def checkpoint_rank(rows):
+    """One joint score over development sessions; never pick an epoch per session."""
+    if not rows:
+        raise ValueError("No development session scores.")
+    if len({r["session"] for r in rows}) != len(rows):
+        raise ValueError("Duplicate development sessions in checkpoint scoring.")
+    accuracies = [float(r["trial_accuracy"]) for r in rows]
+    macro = [float(r["macro_f1"]) for r in rows]
+    if not np.isfinite(accuracies + macro).all():
+        raise ValueError("Non-finite development score.")
+    return (min(accuracies), float(np.mean(accuracies)), float(np.mean(macro)))
+
+
 def develop(args):
     from .model import load_anchor, predict_trials, save_checkpoint, source_prototypes, train
     import torch
@@ -224,6 +237,8 @@ def develop(args):
               "train_sessions": args.train, "development_sessions": args.dev,
               "methods": args.methods, "strengths": args.strengths, "seeds": args.seeds,
               "epochs": args.epochs, "batch_size": args.batch_size, "lr": args.lr,
+              "eval_every": getattr(args, "eval_every", 5),
+              "epoch_selection": "Per run: worst development-session accuracy, then mean accuracy, then mean macro-F1; exact ties retain earlier epoch. One checkpoint for all sessions.",
               "exclude_dev_occupied_trials": args.exclude_dev_occupied_trials,
               "development_trial_exclusions": exclusions,
               "source_trials": len(set(source.group.astype(str))), "source_windows": len(source.X),
@@ -235,30 +250,54 @@ def develop(args):
               "generator_type": "Empirical residual perturbation generator; not electromagnetic simulation"}
     write_json(args.output / "run_config.json", config)
     write_json(args.output / "generator.json", generator.to_dict())
-    rows, predictions, records = [], [], []
+    rows, predictions, records, learning_curve = [], [], [], []
     for method in args.methods:
         strengths = args.strengths if method in ("generic", "session") else [0.]
         for strength in strengths:
             for seed in args.seeds:
                 started = time.monotonic()
-                model, norm, updates = train(source, anchor, generator, method=method,
+
+                def score_epoch(candidate, candidate_norm, epoch, update_count, train_loss):
+                    candidate_prototypes = source_prototypes(candidate, candidate_norm, source, anchor)
+                    session_metrics = []
+                    for session_name, target in targets.items():
+                        predicted = predict_trials(candidate, candidate_norm, candidate_prototypes, target, anchor)
+                        scored = dict(session=session_name, **metrics(predicted))
+                        session_metrics.append(scored)
+                        learning_curve.append(dict(method=method, strength=strength, seed=seed,
+                            epoch=epoch, updates=update_count, training_loss=train_loss, **scored))
+                    pd.DataFrame(learning_curve).to_csv(args.output / "learning_curves.csv", index=False)
+                    rank = checkpoint_rank(session_metrics)
+                    detail = " ".join(f"{r['session']}={r['trial_accuracy']:.3f}" for r in session_metrics)
+                    print(f"CHECKPOINT {method} strength={strength:g} seed={seed} epoch={epoch}: "
+                          f"{detail} worst={rank[0]:.3f} mean={rank[1]:.3f}", flush=True)
+                    return {"rank": list(rank), "sessions": session_metrics}
+
+                model, norm, updates, selection = train(source, anchor, generator, method=method,
                     strength=strength, seed=seed, epochs=args.epochs,
-                    batch_size=args.batch_size, lr=args.lr)
+                    batch_size=args.batch_size, lr=args.lr, on_epoch=score_epoch,
+                    eval_every=getattr(args, "eval_every", 5))
                 prototypes = source_prototypes(model, norm, source, anchor)
                 name = f"{method}_strength{strength:g}_seed{seed}.pt"
                 path = checkpoints / name
                 save_checkpoint(path, model, norm, prototypes, method=method, strength=strength,
-                                seed=seed, updates=updates, source_sessions=args.train)
+                                seed=seed, updates=updates, source_sessions=args.train, **selection)
                 records.append({"method": method, "strength": strength, "seed": seed,
-                                "path": f"checkpoints/{name}", "sha256": sha(path), "updates": updates})
+                                "path": f"checkpoints/{name}", "sha256": sha(path), "updates": updates,
+                                "selected_epoch": selection["selected_epoch"],
+                                "selected_updates": selection["selected_updates"]})
                 for session, target in targets.items():
                     predicted = predict_trials(model, norm, prototypes, target, anchor)
                     for row in predicted:
-                        predictions.append(dict(method=method, strength=strength, seed=seed, **row))
+                        predictions.append(dict(method=method, strength=strength, seed=seed,
+                                                selected_epoch=selection["selected_epoch"], **row))
                     row = dict(method=method, strength=strength, seed=seed, session=session,
-                               updates=updates, train_seconds=time.monotonic()-started, **metrics(predicted))
+                               updates=updates, selected_epoch=selection["selected_epoch"],
+                               selected_updates=selection["selected_updates"],
+                               train_seconds=time.monotonic()-started, **metrics(predicted))
                     rows.append(row)
-                    print(f"DEVELOPMENT {method} strength={strength:g} seed={seed} {session}: {row['trial_accuracy']:.3f}", flush=True)
+                    print(f"DEVELOPMENT {method} strength={strength:g} seed={seed} "
+                          f"selected_epoch={selection['selected_epoch']} {session}: {row['trial_accuracy']:.3f}", flush=True)
                 pd.DataFrame(rows).to_csv(args.output / "development_metrics.csv", index=False)
                 pd.DataFrame(predictions).to_csv(args.output / "development_predictions.csv", index=False)
                 write_json(args.output / "checkpoint_index.json", records)
@@ -357,11 +396,13 @@ def evaluate(args):
         path = args.bundle / record["path"]
         if sha(path) != record["sha256"]:
             raise ValueError("Frozen checkpoint hash mismatch.")
-        model, norm, prototypes, _ = load_checkpoint(path, anchor)
+        model, norm, prototypes, fitted_metadata = load_checkpoint(path, anchor)
         for session, target in targets.items():
             trial_rows = predict_trials(model, norm, prototypes, target, anchor)
             rows.append(dict(method=record["method"], strength=record["strength"],
-                             seed=record["seed"], session=session, **metrics(trial_rows)))
+                             seed=record["seed"], session=session,
+                             selected_epoch=fitted_metadata.get("selected_epoch", config["epochs"]),
+                             **metrics(trial_rows)))
             predicted.extend(dict(method=record["method"], seed=record["seed"], **r) for r in trial_rows)
     frame, predictions = pd.DataFrame(rows), pd.DataFrame(predicted)
     frame.to_csv(args.output / "test_metrics.csv", index=False)
@@ -422,7 +463,10 @@ def parser():
     dev.add_argument("--methods", nargs="+", choices=METHODS, default=list(METHODS))
     dev.add_argument("--strengths", nargs="+", type=float, default=[.5, 1., 1.5])
     dev.add_argument("--seeds", nargs="+", type=int, default=[2026, 2027, 2028])
-    dev.add_argument("--epochs", type=int, default=70)
+    dev.add_argument("--epochs", type=int, default=150,
+                     help="Maximum epochs, run equally for every condition")
+    dev.add_argument("--eval-every", type=int, default=5,
+                     help="Development checkpoint interval; also evaluates first and final epochs")
     dev.add_argument("--batch-size", type=int, default=128)
     dev.add_argument("--lr", type=float, default=.001)
     dev.add_argument("--threads", type=int, default=2)
@@ -449,7 +493,7 @@ def parser():
 
 def main():
     args = parser().parse_args()
-    for name in ("epochs", "batch_size", "threads"):
+    for name in ("epochs", "batch_size", "threads", "eval_every"):
         if hasattr(args, name) and getattr(args, name) <= 0:
             raise SystemExit(f"{name} must be positive.")
     if hasattr(args, "lr") and (not np.isfinite(args.lr) or args.lr <= 0):

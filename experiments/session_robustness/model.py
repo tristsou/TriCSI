@@ -1,4 +1,5 @@
 """Matched training using the existing TriCSI-Anchor network and losses."""
+import copy
 import hashlib
 import importlib
 import sys
@@ -73,13 +74,17 @@ class AugmentedWindows(Dataset):
                 torch.tensor(self.anchor.ORI_TO_INDEX.get(orientation, self.anchor.ORI_TO_INDEX["NA"])))
 
 
-def train(source, anchor, generator, *, method, strength, seed, epochs, batch_size, lr):
+def train(source, anchor, generator, *, method, strength, seed, epochs, batch_size, lr,
+          on_epoch=None, eval_every=5):
+    if eval_every <= 0:
+        raise ValueError("eval_every must be positive.")
     anchor.set_seed(seed)
     norm = anchor.compute_norm(source)  # Real source data only, identical across methods.
     model = anchor.TriCSIAdaptNet(n_classes=len(LABELS), embed_dim=64)
     optimizer = torch.optim.AdamW(model.parameters(), lr=lr, weight_decay=1e-4)
     dataset = AugmentedWindows(source, norm, anchor, method, generator, strength, seed)
     updates = 0
+    best_rank, best_state, selection = None, None, None
     for epoch in range(epochs):
         dataset.start_epoch(epoch)
         # Independent sampler RNG ensures the same batches across conditions,
@@ -108,7 +113,29 @@ def train(source, anchor, generator, *, method, strength, seed, epochs, batch_si
             count += len(y)
         if epoch == 0 or (epoch + 1) % 10 == 0 or epoch + 1 == epochs:
             print(f"{method} seed={seed} epoch={epoch+1}/{epochs} loss={total/count:.4f}", flush=True)
-    return model.eval(), norm, updates
+        if on_epoch is not None and (epoch == 0 or (epoch + 1) % eval_every == 0 or epoch + 1 == epochs):
+            was_training = model.training
+            # Even an unshuffled inference DataLoader consumes a PyTorch seed.
+            # Restore RNG state so validation cannot change subsequent updates.
+            with torch.random.fork_rng(devices=[]):
+                model.eval()
+                result = on_epoch(model, norm, epoch + 1, updates, total/count)
+            model.train(was_training)
+            rank = tuple(float(v) for v in result["rank"])
+            if not rank or not np.isfinite(rank).all():
+                raise ValueError("Invalid development checkpoint score.")
+            # Strict comparison retains the earlier epoch on an exact tie.
+            if best_rank is None or rank > best_rank:
+                best_rank, best_state = rank, copy.deepcopy(model.state_dict())
+                selection = {"selected_epoch": epoch + 1, "selected_updates": updates,
+                             "selected_development": result}
+    if best_state is not None:
+        model.load_state_dict(best_state)
+    if selection is None:
+        selection = {"selected_epoch": epochs, "selected_updates": updates,
+                     "selected_development": None}
+    selection["max_epochs_run"] = epochs
+    return model.eval(), norm, updates, selection
 
 
 @torch.no_grad()

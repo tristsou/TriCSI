@@ -11,7 +11,7 @@ import numpy as np
 from experiments.session_robustness.data import (LABELS, Windows, assert_disjoint,
     calibrate, combine, load_windows, read_sessions, save_windows)
 from experiments.session_robustness.generator import SessionGenerator
-from experiments.session_robustness.study import ROOT, audit_trial, develop, evaluate, freeze, prepare, resolve_exclusions
+from experiments.session_robustness.study import ROOT, audit_trial, checkpoint_rank, develop, evaluate, freeze, prepare, resolve_exclusions
 
 
 def fixture(session, seed, occupied_trials=1, empty_trials=2):
@@ -142,6 +142,45 @@ class GeneratorTests(unittest.TestCase):
 
 
 class PipelineTests(unittest.TestCase):
+    def test_joint_checkpoint_rule_prefers_robustness(self):
+        high_average = [{"session": "S8", "trial_accuracy": .95, "macro_f1": .9},
+                        {"session": "S9", "trial_accuracy": .4, "macro_f1": .4}]
+        robust = [{"session": "S8", "trial_accuracy": .65, "macro_f1": .6},
+                  {"session": "S9", "trial_accuracy": .65, "macro_f1": .6}]
+        self.assertGreater(checkpoint_rank(robust), checkpoint_rank(high_average))
+        with self.assertRaises(ValueError):
+            checkpoint_rank(high_average + high_average)
+
+    def test_checkpoint_restore_and_validation_preserves_training_rng(self):
+        import torch
+        from experiments.session_robustness.model import load_anchor, train
+        torch.set_num_threads(1)
+        source_a, ref_a = calibrate(fixture("A", 1))
+        source_b, ref_b = calibrate(fixture("B", 2))
+        source, reference = combine([source_a, source_b]), combine([ref_a, ref_b])
+        generator = SessionGenerator.fit(source, reference)
+        anchor = load_anchor(ROOT)
+        settings = dict(method="existing", strength=0., seed=2026, epochs=3, batch_size=16, lr=.001)
+        snapshots = {}
+
+        def score(model, norm, epoch, updates, loss):
+            self.assertFalse(model.training)
+            torch.rand(17)  # Must not change the next epoch's dropout/masking.
+            snapshots[epoch] = {k: v.clone() for k, v in model.state_dict().items()}
+            return {"rank": [1. if epoch == 1 else 0.], "sessions": []}
+
+        best, _, count, selected = train(source, anchor, generator, **settings,
+                                        on_epoch=score, eval_every=1)
+        self.assertEqual(selected["selected_epoch"], 1)
+        self.assertEqual(selected["max_epochs_run"], 3)
+        self.assertLess(selected["selected_updates"], count)
+        for key, value in best.state_dict().items():
+            self.assertTrue(torch.equal(value, snapshots[1][key]), key)
+        plain, _, plain_count, _ = train(source, anchor, generator, **settings)
+        self.assertEqual(count, plain_count)
+        for key, value in plain.state_dict().items():
+            self.assertTrue(torch.equal(value, snapshots[3][key]), key)
+
     def test_full_neural_development_freeze_evaluate(self):
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
@@ -160,6 +199,8 @@ class PipelineTests(unittest.TestCase):
             self.assertEqual(config["source_trials"], 20)
             index = json.loads((dev / "checkpoint_index.json").read_text())
             self.assertEqual(len({r["updates"] for r in index}), 1)
+            self.assertTrue(all(r["selected_epoch"] == 1 for r in index))
+            self.assertTrue((dev / "learning_curves.csv").is_file())
             bundle = root / "bundle"
             freeze(argparse.Namespace(project_root=ROOT, development_run=dev, output=bundle))
             result = root / "evaluation"

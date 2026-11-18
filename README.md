@@ -98,5 +98,4 @@ Full ESP32 firmware/build settings remain missing. A current Windows environment
 lock was received; its identity as the environment for every historical training
 run is not proven. Three-link source uses placeholder transmitter MACs; use the
 documented runtime link map for real recordings. The owner has not selected a
-code or dataset license; see [availability](docs/AVAILABILITY.md). Implementation
-and documentation include AI-assisted work requiring researcher review.
+code or dataset license; see [availability](docs/AVAILABILITY.md).

@@ -1,0 +1,13 @@
+{
+  "command": "two-evaluate",
+  "arguments": [
+    "--sessions",
+    "S8",
+    "S9",
+    "--raw-dir",
+    "data/raw",
+    "--checkpoint",
+    "models/tricsi_anchor_s4_s5_s6_s7.pt"
+  ],
+  "description": "Evaluate exact saved model; no neural retraining."
+}

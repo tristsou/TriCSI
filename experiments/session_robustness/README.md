@@ -1,5 +1,10 @@
 # TriCSI session-robustness experiment
 
+Reader entry point: [reproduction guide](../../docs/REPRODUCE.md) and
+[results ledger](../../reports/README.md). The implementation guide below retains
+earlier S4-S6 examples; the current S4-S7 recipes are in `configs`. Actual data
+and fitted checkpoints remain pending publication.
+
 ## The question
 
 Does adding source-informed CSI variations improve real cross-session

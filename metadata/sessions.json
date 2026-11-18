@@ -1,0 +1,47 @@
+{
+  "two_link": {
+    "source_original": [
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "extension_development": [
+      "S8",
+      "S9"
+    ],
+    "historical_evaluation": [
+      "S8",
+      "S9"
+    ],
+    "historical_source_background": "all Empty trials",
+    "current_source_background": "dedicated Empty trial 1, reserved from source training",
+    "target_background": "Empty trial 1 only",
+    "exclude_occupied_by_session": {
+      "S8": [
+        1,
+        2
+      ],
+      "S9": []
+    },
+    "scored_trials": {
+      "S8": 40,
+      "S9": 40
+    }
+  },
+  "three_link": {
+    "source_development": [
+      "3TX_S1",
+      "3TX_S2"
+    ],
+    "historical_frozen_evaluation": [
+      "3TX_S3"
+    ],
+    "trial_count_per_session": 50
+  },
+  "notes": [
+    "S8/S9 have informed current extension development; new selected results are not confirmatory.",
+    "Other recorded sessions have no new assigned role.",
+    "Physical zone compatibility must be checked separately."
+  ]
+}

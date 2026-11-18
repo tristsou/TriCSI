@@ -1,44 +1,88 @@
 # TriCSI
 
-TriCSI is a Wi-Fi channel state information (CSI) research project using ESP32-S3 boards to classify stationary occupancy in a nine-zone indoor grid and distinguish it from an empty room. The repository collects the available project source, including earlier experiments and analysis utilities.
+**Low-cost, device-free indoor localization with ESP32-S3 Wi-Fi channel state
+information (CSI).** TriCSI classifies a stationary person into nine zones and
+distinguishes occupied trials from an empty room. It contains a two-link neural
+model, a three-link feature/classifier study, and cross-session experiments.
 
-Start in [`workflows/`](workflows/). The scripts there have descriptive names and run the original source with the same arguments, so older commands and source verification checks still work.
+## Start here
 
-The new [session-robustness experiment](experiments/session_robustness/README.md)
-adds source-informed CSI generation and matched comparisons using all eligible
-source trials and the existing two-link neural architecture. Start with its
-read-only inventory command. It is an experimental extension; no raw recordings
-or evidence of improved accuracy are included.
+1. Read the [overview](docs/OVERVIEW.md) for the scientific question and workflow.
+2. Follow [setup](docs/SETUP.md); run `python -m tricsi doctor --code-only`.
+3. Check [data availability](docs/DATA.md). **Raw recordings and fitted checkpoints
+   have not been uploaded. A code-only clone cannot reproduce the accuracies.**
+4. Follow [reproduction](docs/REPRODUCE.md) for exact commands and split rules.
+5. Read [contributing](CONTRIBUTING.md) before changing a model or protocol.
 
-The [zone-confusion diagnostics](experiments/session_diagnostics/README.md) inspect
-measured CSI, saved embeddings and trial metadata, and compare the original shape
-channels with Empty-relative shape channels under a matched training schedule.
+## Reported measurements
 
-| Task | Script | Guide |
-| --- | --- | --- |
-| Collect two-link development trials | [`collect_two_link_anchor_trials.py`](workflows/collect_two_link_anchor_trials.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |
-| Collect two-link confirmatory trials | [`collect_two_link_confirmatory_trials.py`](workflows/collect_two_link_confirmatory_trials.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |
-| Train the two-link model | [`train_two_link_anchor_model.py`](workflows/train_two_link_anchor_model.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |
-| Evaluate the saved two-link model | [`evaluate_two_link_anchor_model.py`](workflows/evaluate_two_link_anchor_model.py) | [Two-link Anchor notes](docs/TRICSI_ANCHOR_FINAL_PLAN.md) |
-| Collect trials from three Wi-Fi links | [`collect_three_link_trials.py`](workflows/collect_three_link_trials.py) | [Three-link modeling](tricsi_3tx_modeling_bundle/README_3TX_MODELING.md) |
-| Train and compare link combinations | [`train_and_compare_three_link_subsets.py`](workflows/train_and_compare_three_link_subsets.py) | [Three-link modeling](tricsi_3tx_modeling_bundle/README_3TX_MODELING.md) |
-| Evaluate the saved three-link models | [`evaluate_frozen_three_link_models.py`](workflows/evaluate_frozen_three_link_models.py) | [Three-link modeling](tricsi_3tx_modeling_bundle/README_3TX_MODELING.md) |
-| Compare signal inputs and baseline classifiers | [`compare_three_link_feature_baselines.py`](workflows/compare_three_link_feature_baselines.py) | [Development controls](TriCSI_review_response/README.md) |
-| Compare two-link model components | [`compare_two_link_model_components.py`](workflows/compare_two_link_model_components.py) or [matched seeds](workflows/compare_two_link_components_matched_seeds.py) | [Development controls](TriCSI_review_response/README.md) |
-| Run the six-model follow-up | [`run_six_model_followup_study.py`](workflows/run_six_model_followup_study.py) | [Six-model study](TriCSI_six_model_study/README.md) |
-| Audit two-link test sessions | [`audit_two_link_test_sessions.py`](workflows/audit_two_link_test_sessions.py) | [Six-model study](TriCSI_six_model_study/README.md) |
-| Generate paper figures from saved results | [`generate_paper_figures.py`](workflows/generate_paper_figures.py) | [Figure inputs and instructions](figures/verified/README_START_HERE.md) |
+| Experiment | Sources | Evaluation | Accuracy | Evidence here |
+| --- | --- | --- | --- | --- |
+| Original frozen two-link model | S4–S7; target Empty calibration | Historical S8 / S9 | 95% / 52.5% | Reported result and evaluator; artifacts pending |
+| Original frozen three-link study | 3TX_S1/S2 | Historical 3TX_S3 | Three links 84%; outer pair 70% | Reported result and code; artifacts pending |
+| Script-default reconstruction | S4–S7; original trainer, 70 epochs | S8 / S9 | 87.5% / 55% | Owner-supplied terminal report |
+| Original shape, three seeds | S4–S7; checkpoints selected on S8/S9 | Development S8 / S9 | Mean 79.17% / 65.83% | Parsed owner-supplied log |
+| Empty-relative shape, three seeds | Same data and matched budget | Development S8 / S9 | Mean 72.50% / 54.17% | Parsed owner-supplied log |
 
-Other source directories cover [serial capture and live display](python_utils/), the [one-day experiment workflow](TriCSI_One_Day_Code/README_FIRST.md), and [illustrative examples](examples/).
+The shape change **did not improve accuracy**. New checkpoint-selected S8/S9
+scores are development findings, not independent test evidence. See the
+[results ledger](reports/README.md) for provenance and limitations. Synthetic
+software tests check implementation behavior; they do not establish RF accuracy.
 
-### Running the code
+## One command interface
 
-Run commands from the repository root. For example, use `python workflows/evaluate_frozen_three_link_models.py --help` to see the evaluator's options. These scripts came from separate experiments and have different dependencies and input formats. The linked guides list the setup instructions where available. Before collecting data, review the serial port, baud rate, and transmitter mappings in the selected collector and its configuration.
+Run from the checkout root with the project's Python environment:
 
-Collection requires compatible ESP32 firmware that emits CSI data. The full ESP32 firmware tree was not in the recovered sources; a packet-timing patch reference is in `archive/starter/`. Some historical scripts assume a Windows project directory and expect existing dataset, checkpoint, or result files. Supply those locally before running them. Raw captures, fitted checkpoints, and generated outputs are not part of this source export. The example with hypothetical accuracies is illustrative and does not contain experimental evidence.
+```powershell
+python -m tricsi --help
+python -m tricsi inventory --raw-dir data/raw --output results/inventory_new
+python -m tricsi run configs/background_shape_s4_s7.json --dry-run
+```
 
-`archive/` preserves earlier packages and distinct versions found in the sources. [SOURCE_MANIFEST.tsv](SOURCE_MANIFEST.tsv) records where each imported file came from and its SHA-256 digest. The active one-day workflow combines the v2 package with the v3 parser patch; the separate versions are preserved in the archive.
+[Recipes](configs/README.md) record complete argument lists. `--dry-run` prints
+the recipe without training. Original `python -m experiments...` commands remain
+valid. Use new output directories for reruns.
 
-### Hardware addresses in the public source
+## Repository map
 
-Transmitter MAC addresses from the original setup have been replaced with consistent `02:00:00:00:00:xx` placeholders. Set the addresses in the collector and its configuration before collecting data. For an existing dataset, configure its corresponding transmitter addresses locally; workflows that compare against reference copies require the same mapping in both copies. Keep those local edits and raw captures outside public commits. The source manifest and reference hashes describe this public copy.
+| Location | Purpose |
+| --- | --- |
+| [tricsi/](tricsi/) | Supported CLI, asset checks, bundle creation and verification |
+| [configs/](configs/README.md) | Fixed source lists, seeds and scoring exclusions |
+| [experiments/](experiments/) | Neural training, generator, shape comparison and diagnostics |
+| [tricsi_3tx_modeling_bundle/](tricsi_3tx_modeling_bundle/README_3TX_MODELING.md) | Three-link extraction, subset training and frozen evaluation |
+| [docs/](docs/README.md) | Setup, architecture, data dictionary and reproduction |
+| [metadata/](metadata/README.md) | Session roles, asset status, engine hashes and migration map |
+| [reports/](reports/README.md) | Small result summaries with evidence labels |
+| [workflows/](workflows/) | Descriptive wrappers for preserved entry points |
+| [legacy/](legacy/README.md), [archive/](archive/README.md) | Historical utilities and recovered packages |
+| [tests/](tests/) | Interface, recipe, archive integrity and preservation checks |
+
+Nine compatibility/engine Python files remain at the root because historical
+scripts and saved audit records refer to their paths. See
+[architecture](docs/ARCHITECTURE.md); new development belongs in modules above.
+
+## Finish the data release
+
+The owner can package the original working project, including raw measurements,
+exact local code, caches, models, run settings, predictions and environment:
+
+```powershell
+python -m tricsi bundle --project-root C:\ESP32-CSI-Tool\tricsi_localization --output C:\Users\ch_ts\TriCSI-reproduction-v1.zip
+python -m tricsi verify-bundle C:\Users\ch_ts\TriCSI-reproduction-v1.zip
+```
+
+Run from this reorganized checkout using the Python environment that runs TriCSI.
+The tool reads the original project, writes outside it, preserves source/data
+bytes, skips virtual environments and redundant ZIPs, and verifies included file
+hashes. It does not publish anything. Follow [publishing](docs/PUBLISHING.md) to
+upload the asset and update the [catalog](metadata/assets.json).
+
+## Scope and availability
+
+This is not a validated room simulator or a solution proven robust across rooms.
+Full ESP32 firmware/build settings and the historical Windows environment lock
+are still missing. Three-link source uses placeholder transmitter MACs; use the
+documented runtime link map for real recordings. The owner has not selected a
+code or dataset license; see [availability](docs/AVAILABILITY.md). Implementation
+and documentation include AI-assisted work requiring researcher review.

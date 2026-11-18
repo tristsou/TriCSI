@@ -1,0 +1,17 @@
+{
+  "command": "prepare",
+  "arguments": [
+    "--raw-dir",
+    "data/raw",
+    "--sessions",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "S8",
+    "S9",
+    "--cache-dir",
+    "outputs/session_cache_v1"
+  ],
+  "description": "See docs/REPRODUCE.md for prerequisites and interpretation."
+}

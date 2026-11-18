@@ -1,0 +1,31 @@
+{
+  "session": null,
+  "recorded_at": null,
+  "participant_id": null,
+  "room_configuration_id": null,
+  "grid_coordinate_units": "meters",
+  "zone_centers": null,
+  "devices": [
+    {
+      "role": "receiver",
+      "hardware_id": null,
+      "mac": null,
+      "position_m": null,
+      "antenna_orientation": null
+    },
+    {
+      "role": "transmitter",
+      "hardware_id": null,
+      "mac": null,
+      "position_m": null,
+      "antenna_orientation": null
+    }
+  ],
+  "collector_command": null,
+  "firmware_repository": null,
+  "firmware_commit": null,
+  "firmware_build_settings": null,
+  "environment_changes": "unknown until recorded",
+  "photos_or_diagram_paths": [],
+  "notes": "Fill from actual collection notes. Do not infer physical setup from a filename or invent missing historical measurements."
+}

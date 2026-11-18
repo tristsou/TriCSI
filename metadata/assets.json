@@ -1,0 +1,70 @@
+{
+  "status": "not_published",
+  "release_url": null,
+  "bundle_sha256": null,
+  "bundle_bytes": null,
+  "code_commit": null,
+  "note": "Code and reported summaries are available. Real data/model bundle is still on the owner workstation. Do not infer original identity from a filename.",
+  "required": [
+    {
+      "path": "data/raw/S4",
+      "status": "not_published"
+    },
+    {
+      "path": "data/raw/S5",
+      "status": "not_published"
+    },
+    {
+      "path": "data/raw/S6",
+      "status": "not_published"
+    },
+    {
+      "path": "data/raw/S7",
+      "status": "not_published"
+    },
+    {
+      "path": "data/raw/S8",
+      "status": "not_published"
+    },
+    {
+      "path": "data/raw/S9",
+      "status": "not_published"
+    },
+    {
+      "path": "data_3tx/raw/3TX_S1",
+      "status": "not_published"
+    },
+    {
+      "path": "data_3tx/raw/3TX_S2",
+      "status": "not_published"
+    },
+    {
+      "path": "data_3tx/raw/3TX_S3",
+      "status": "not_published"
+    },
+    {
+      "path": "models/tricsi_anchor_s4_s5_s6_s7.pt",
+      "status": "not_published"
+    },
+    {
+      "path": "results/3tx_dev_comparison/frozen_3tx_model.joblib",
+      "status": "not_published"
+    },
+    {
+      "path": "outputs/session_cache_v1",
+      "status": "not_published"
+    },
+    {
+      "path": "results/background_shape_s4_s7_v1",
+      "status": "not_published"
+    },
+    {
+      "path": "original_environment_records",
+      "status": "not_published"
+    },
+    {
+      "path": "hardware_setup_and_firmware",
+      "status": "not_published"
+    }
+  ]
+}

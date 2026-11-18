@@ -1,0 +1,24 @@
+{
+  "fitting_performed": false,
+  "python": "3.12.14",
+  "sklearn": "1.9.0",
+  "numpy": "2.3.5",
+  "load_warnings": [],
+  "results": [
+    {
+      "subset": "2tx_outer",
+      "accuracy": 0.7,
+      "trials": 50,
+      "all_saved_trial_labels_match": true
+    },
+    {
+      "subset": "3tx_all",
+      "accuracy": 0.84,
+      "trials": 50,
+      "all_saved_trial_labels_match": true
+    }
+  ],
+  "input_bundle_sha256": "8a394293c8a52ab53acbcdf00124c7eab5616828d166db3c18c4aa4f9653661d",
+  "checkpoint_path_in_bundle": "project/results/3tx_dev_comparison/frozen_3tx_model.joblib",
+  "checkpoint_sha256": "575461a5527294f3361b1cb3d01949b1d493100d095d39c78a741d8ea63a1a39"
+}

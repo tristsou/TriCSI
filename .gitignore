@@ -26,3 +26,4 @@ checkpoints/
 *.zip
 metadata/local_link_map.json
 reports/private/
+!reports/verified/*.csv

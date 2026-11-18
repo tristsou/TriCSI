@@ -1,0 +1,18 @@
+{
+  "interpretation": "Exploratory development only. Equal averaging across all three legacy seeds; no weight fitting.",
+  "results": [
+    {
+      "session": "S8",
+      "equal_probability_ensemble_correct": 33,
+      "trials": 40,
+      "any_seed_correct_upper_bound": 36
+    },
+    {
+      "session": "S9",
+      "equal_probability_ensemble_correct": 27,
+      "trials": 40,
+      "any_seed_correct_upper_bound": 35
+    }
+  ],
+  "input_bundle_sha256": "8a394293c8a52ab53acbcdf00124c7eab5616828d166db3c18c4aa4f9653661d"
+}

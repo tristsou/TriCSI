@@ -2,10 +2,13 @@
 
 ## Availability and paths
 
-No real-data release is currently published by this reorganization. The owner's
-backup log records 1,769 copied files, including measurements, models, caches
-and results. That local copy is not a public dataset or proof of model identity.
-See [asset status](../metadata/assets.json).
+The owner supplied `TriCSI-reproduction-v1.zip`: 2,018 files, 246,014,376 bytes,
+with all per-file checksums verified. Raw data, models, caches and outputs are in
+the bundle, but its GitHub release attachment remains pending. See
+[asset status](../metadata/assets.json) and the
+[complete manifest](../metadata/reproduction_bundle_manifest.json).
+The original two-link and primary/outer three-link fitted models were re-evaluated
+without fitting; all 180 compared trial labels match the stored predictions.
 
 | Path | Contents |
 | --- | --- |

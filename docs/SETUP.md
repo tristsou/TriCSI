@@ -15,6 +15,11 @@ Python 3.12 is the software-test target, not a verified historical requirement.
 For exact fitted scikit-learn/PyTorch models, restore the original environment
 using the release's Python version, requirements lock and environment records.
 The root requirements are a starter dependency list, not a historical lock.
+The owner supplied an actual [working-environment lock](../metadata/owner_requirements_lock.txt)
+and [Windows/Python details](../metadata/owner_environment.json). That captured
+environment uses Python 3.14.6 and CPU PyTorch 2.12.1. On matching Windows/Python,
+install its lock with `python -m pip install -r metadata/owner_requirements_lock.txt --extra-index-url https://download.pytorch.org/whl/cpu`.
+Do not assume that this captured environment identifies every older training run.
 For CPU PyTorch see https://pytorch.org/get-started/locally/ .
 
 ```powershell

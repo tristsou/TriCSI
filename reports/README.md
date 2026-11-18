@@ -1,9 +1,18 @@
 # Results ledger
 
-[reported_results.json](reported_results.json) separates owner-reported historical
-scores from results parsed from a supplied training log. The original raw data,
-checkpoint hashes and full metrics/prediction files have not yet been published.
-No summary here is presented as an independently rerun scientific result.
+[reported_results.json](reported_results.json) preserves the initial owner-reported
+and log-derived evidence. The owner subsequently supplied a verified full bundle.
+[Reproduction receipts](verified/) now record rerunning the original fitted
+two-link model and the outer/all-three link models without training. All 180
+compared trial labels match. These are checks of the same historical recordings,
+not fresh independent validation. The GitHub bundle attachment is pending.
+
+The owner-uploaded measured comparison/reconstruction CSVs and the newly reproduced
+trial predictions are tracked in `verified`. Checkpoint and bundle hashes in the
+receipts link them to the complete manifest. The validation host used Linux/Python
+3.12.14, CPU PyTorch 2.12.1 and scikit-learn 1.9.0. The owner's captured working
+environment is Windows/Python 3.14.6. Tiny probability differences did not change
+any compared label. These checks do not reproduce model training itself.
 
 ## S4–S7 shape comparison
 

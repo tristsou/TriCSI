@@ -24,9 +24,11 @@ Requires raw S4–S9 and the exact `models/tricsi_anchor_s4_s5_s6_s7.pt`. Source
 S4–S7 construct prototypes with the frozen encoder; target information is Empty
 trial 1 only. S8 occupied trials 1–2 and both sessions' Empty trial 1 are excluded
 from scoring. Expect 40 scored trials per session with the known recordings.
-Original reported values are 38/40 and 21/40; compare predictions and hashes, not
-only rounded accuracy. The original environment/checkpoint identity is still
-pending publication, so these values have not been independently reproduced here.
+Original values are 38/40 and 21/40; compare predictions and hashes, not only
+rounded accuracy. The owner bundle was re-evaluated on Linux/Python 3.12.14 with
+CPU PyTorch 2.12.1: all 80 saved trial labels matched. The small cross-platform
+probability differences are recorded in the reproduction receipt. The bundle's
+public release upload is pending; code-only clones still lack the assets.
 
 The supported adapter writes under `results/reproduced_two_link/` and refuses an
 existing evaluation directory. For another run:
@@ -82,9 +84,10 @@ Set the actual recorded MAC mapping as explained in [data](DATA.md).
 python -m tricsi run configs/frozen_three_link.json --link-map metadata/local_link_map.json
 ```
 
-The original bundle must include its fitted subset models, feature configuration,
+The uploaded original bundle includes its fitted subset models, feature configuration,
 training sessions/data hashes and primary subset. It evaluates historical 3TX_S3
-without fitting. A parser/version/mapping mismatch is a reproducibility problem
+without fitting. All 50 outer-pair and 50 all-three predictions were reproduced
+using scikit-learn 1.9.0, giving 70% and 84%. A parser/version/mapping mismatch is a reproducibility problem
 to inspect, not a reason to retrain silently.
 
 To rerun development separately:

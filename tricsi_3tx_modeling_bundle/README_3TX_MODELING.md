@@ -1,5 +1,10 @@
 # TriCSI three-transmitter comparison and frozen test
 
+For the supported reorganized checkout, use [the reproduction guide](../docs/REPRODUCE.md)
+and `python -m tricsi three-evaluate --help`. It includes the runtime MAC mapping
+needed by original recordings. The package-placement instructions below describe
+the historical standalone layout; do not copy these files into the root again.
+
 This pipeline compares every one-, two-, and three-transmitter subset on
 `3TX_S1` and `3TX_S2`, freezes a development-selected primary model plus the
 predeclared hardware-ablation models, and later tests those exact models once

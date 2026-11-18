@@ -1,0 +1,12 @@
+{
+  "command": "three-evaluate",
+  "arguments": [
+    "--model",
+    "results/3tx_dev_comparison/frozen_3tx_model.joblib",
+    "--session",
+    "data_3tx/raw/3TX_S3",
+    "--output",
+    "results/3tx_s3_reproduction"
+  ],
+  "description": "See docs/REPRODUCE.md for prerequisites and interpretation."
+}

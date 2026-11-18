@@ -1,0 +1,16 @@
+[
+  {
+    "file": "shape_comparison_metrics.csv",
+    "source_path_in_bundle": "project/results/background_shape_s4_s7_v1/comparison_metrics.csv",
+    "source_sha256": "3fe724b76f3661f1a496e4ce1e9e85f945fec64b11e81631ac76194fd32a87b3",
+    "public_copy_sha256": "00a0ccf6594b764801c6b45726de516873bc2ad8f006d6ddcd0747e40569f707",
+    "transformation": "CRLF normalized to LF for Git; CSV field values unchanged. Exact original bytes remain in verified bundle."
+  },
+  {
+    "file": "historical_reconstruction_metrics.csv",
+    "source_path_in_bundle": "project/results/historical_s4_s7_reconstruction_v1/reconstruction_metrics.csv",
+    "source_sha256": "e7d1b71269df4e6231e2d6ba6607cacee70fffceef298a5237c392ee4a684184",
+    "public_copy_sha256": "700a69cff81a9cbeee1ee5e49e3e174000ed79065c6e5f4db240d52fea046de4",
+    "transformation": "CRLF normalized to LF for Git; CSV field values unchanged. Exact original bytes remain in verified bundle."
+  }
+]

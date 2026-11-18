@@ -1,0 +1,91 @@
+{
+  "evidence_status": "owner_reported_and_log_derived_not_independently_rerun",
+  "shape_comparison": {
+    "source_log_sha256": "b0b6f8ec177a6e4bfaf71a45f2333a518d7339e21ead55447c40b07558392a2f",
+    "source_log_description": "Owner-supplied complete S4-S7 150-epoch comparison terminal log. Source file not published; full CSV outputs pending.",
+    "train_sessions": [
+      "S4",
+      "S5",
+      "S6",
+      "S7"
+    ],
+    "development_sessions": [
+      "S8",
+      "S9"
+    ],
+    "seeds": [
+      2026,
+      2027,
+      2028
+    ],
+    "selected": [
+      {
+        "arm": "legacy",
+        "seed": 2026,
+        "selected_epoch": 90,
+        "S8_accuracy": 0.825,
+        "S9_accuracy": 0.625
+      },
+      {
+        "arm": "legacy",
+        "seed": 2027,
+        "selected_epoch": 80,
+        "S8_accuracy": 0.725,
+        "S9_accuracy": 0.7
+      },
+      {
+        "arm": "legacy",
+        "seed": 2028,
+        "selected_epoch": 110,
+        "S8_accuracy": 0.825,
+        "S9_accuracy": 0.65
+      },
+      {
+        "arm": "relative_shape",
+        "seed": 2026,
+        "selected_epoch": 105,
+        "S8_accuracy": 0.775,
+        "S9_accuracy": 0.5
+      },
+      {
+        "arm": "relative_shape",
+        "seed": 2027,
+        "selected_epoch": 130,
+        "S8_accuracy": 0.725,
+        "S9_accuracy": 0.55
+      },
+      {
+        "arm": "relative_shape",
+        "seed": 2028,
+        "selected_epoch": 70,
+        "S8_accuracy": 0.675,
+        "S9_accuracy": 0.575
+      }
+    ]
+  },
+  "historical_two_link": {
+    "evidence": "Owner-reported frozen evaluation",
+    "S8_correct": 38,
+    "S8_trials": 40,
+    "S9_correct": 21,
+    "S9_trials": 40,
+    "artifact_sha256": null
+  },
+  "historical_three_link": {
+    "evidence": "Owner-reported frozen evaluation",
+    "session": "3TX_S3",
+    "three_link_correct": 42,
+    "outer_pair_correct": 35,
+    "trials": 50,
+    "artifact_sha256": null
+  },
+  "reconstruction": {
+    "evidence": "Owner-supplied terminal output in conversation",
+    "epochs": 70,
+    "seed": 26082026,
+    "S8_correct": 35,
+    "S9_correct": 22,
+    "trials_per_session": 40,
+    "actual_historical_settings_verified": false
+  }
+}

@@ -1,0 +1,14 @@
+{
+  "python": "3.12.14",
+  "platform": "Linux",
+  "packages": {
+    "numpy": "2.3.5",
+    "pandas": "2.2.3",
+    "scipy": "1.17.0",
+    "scikit-learn": "1.8.0",
+    "matplotlib": "3.10.8",
+    "joblib": "1.5.3",
+    "torch": "2.15.0+cpu"
+  },
+  "scope": "Synthetic software checks only; not the historical Windows environment."
+}

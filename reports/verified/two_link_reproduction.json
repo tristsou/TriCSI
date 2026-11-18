@@ -1,0 +1,27 @@
+{
+  "fitting_performed": false,
+  "python": "3.12.14",
+  "torch": "2.12.1+cpu",
+  "numpy": "2.3.5",
+  "sessions": [
+    {
+      "session": "S8",
+      "trials": 40,
+      "correct": 38,
+      "accuracy": 0.95,
+      "all_saved_trial_labels_match": true,
+      "max_abs_probability_difference": 1.3908192443568002e-07
+    },
+    {
+      "session": "S9",
+      "trials": 40,
+      "correct": 21,
+      "accuracy": 0.525,
+      "all_saved_trial_labels_match": true,
+      "max_abs_probability_difference": 1.1361938659359971e-07
+    }
+  ],
+  "input_bundle_sha256": "8a394293c8a52ab53acbcdf00124c7eab5616828d166db3c18c4aa4f9653661d",
+  "checkpoint_path_in_bundle": "project/models/tricsi_anchor_s4_s5_s6_s7.pt",
+  "checkpoint_sha256": "4e8413fde4da91a30134f65313b4b214517b7d1281753c9118a67af05d46a4e3"
+}

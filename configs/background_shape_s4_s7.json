@@ -1,0 +1,28 @@
+{
+  "command": "compare-shape",
+  "arguments": [
+    "--cache-dir",
+    "outputs/session_cache_v1",
+    "--train",
+    "S4",
+    "S5",
+    "S6",
+    "S7",
+    "--dev",
+    "S8",
+    "S9",
+    "--exclude-dev-occupied-by-session",
+    "S8:1,2",
+    "--epochs",
+    "150",
+    "--eval-every",
+    "5",
+    "--seeds",
+    "2026",
+    "2027",
+    "2028",
+    "--output",
+    "results/background_shape_s4_s7_v1"
+  ],
+  "description": "Controlled development comparison, two representations x three matched seeds."
+}

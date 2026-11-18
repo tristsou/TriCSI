@@ -1,0 +1,18 @@
+{
+  "command": "reconstruct",
+  "arguments": [
+    "--cache-dir",
+    "outputs/session_cache_v1",
+    "--epochs",
+    "70",
+    "--seed",
+    "26082026",
+    "--batch-size",
+    "128",
+    "--lr",
+    "0.001",
+    "--output",
+    "results/historical_s4_s7_reconstruction_v1"
+  ],
+  "description": "Script-default reconstruction; actual historical seed/epochs are not verified."
+}

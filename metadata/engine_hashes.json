@@ -1,0 +1,10 @@
+{
+  "project_config.py": "acf3061d8999ac17a9e9e7d567cc5ebcb1f0c062e76e857fc0967622ec01eae4",
+  "csi_io.py": "90fa3b894b774c7bc32b73435a77e985507792c4ae381bc9022d95c3fafcf424",
+  "train_csi_cnn.py": "fced7fd1a5d7f56d41a4b4a618cc269011eabc4108ba1ed278c04f1b25d4b6b3",
+  "train_tricsi_anchor_final.py": "c439714cdbb5ae934d62b30cef8f0251b2afa0a18a06420aa42df859299f4bd2",
+  "evaluate_frozen_anchor_confirmatory.py": "4cffb5e67b4455ce8b2aef76da9fa36d2efbd7ff2ccf975c7377d03f84379ff8",
+  "tricsi_3tx_modeling_bundle/tricsi_3tx_modeling.py": "8ebea3e4e6867222b67241c7a47e0e92ac16164f194c7c842b13cc8e90973db4",
+  "tricsi_3tx_modeling_bundle/compare_and_freeze_3tx.py": "7724fe1978cb860be8ae5a43b92b7482bb985f1d1dc0e04b30380cfba391103d",
+  "tricsi_3tx_modeling_bundle/evaluate_frozen_3tx.py": "78045ffdff9ad3058c80d2e8ba19da20e0aca1bfb9ecfa282dff9b95d185797a"
+}

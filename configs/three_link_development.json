@@ -1,0 +1,20 @@
+{
+  "command": "three-train",
+  "arguments": [
+    "--s1",
+    "data_3tx/raw/3TX_S1",
+    "--s2",
+    "data_3tx/raw/3TX_S2",
+    "--output",
+    "results/3tx_dev_reproduction",
+    "--seed",
+    "2026",
+    "--trees",
+    "400",
+    "--window-packets",
+    "64",
+    "--windows-per-trial",
+    "7"
+  ],
+  "description": "See docs/REPRODUCE.md for prerequisites and interpretation."
+}

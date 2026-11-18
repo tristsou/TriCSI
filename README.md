@@ -9,9 +9,9 @@ model, a three-link feature/classifier study, and cross-session experiments.
 
 1. Read the [overview](docs/OVERVIEW.md) for the scientific question and workflow.
 2. Follow [setup](docs/SETUP.md); run `python -m tricsi doctor --code-only`.
-3. Check [data availability](docs/DATA.md). **The owner's data/model bundle has
-   been received and verified, but its GitHub release upload is pending. A
-   code-only clone still cannot run the empirical evaluations.**
+3. Download the [verified data/model bundle](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1) and follow
+   [data availability](docs/DATA.md) for restoration. The bundle includes the
+   recordings, fitted models, caches, results and original working snapshot.
 4. Follow [reproduction](docs/REPRODUCE.md) for exact commands and split rules.
 5. Read [contributing](CONTRIBUTING.md) before changing a model or protocol.
 
@@ -71,9 +71,11 @@ scripts and saved audit records refer to their paths. See
 `TriCSI-reproduction-v1.zip` has 2,018 manifest files and is 246,014,376 bytes.
 Every file hash passed verification. See the [full manifest](metadata/reproduction_bundle_manifest.json),
 [owner environment](metadata/owner_environment.json) and
-[reproduction receipts](reports/verified/). The ZIP is not yet attached to a
-GitHub release; [assets.json](metadata/assets.json) deliberately retains a null
-download URL until upload succeeds.
+[reproduction receipts](reports/verified/). Download it from the
+[published release](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1); choose `TriCSI-reproduction-v1.zip` under Assets.
+GitHub's uploaded size and SHA-256 match the verified original. The automatic
+Source code ZIP contains code only. [assets.json](metadata/assets.json) records
+the exact download URL and release commit.
 
 The owner can package the original working project, including raw measurements,
 exact local code, caches, models, run settings, predictions and environment:

@@ -28,7 +28,8 @@ Original values are 38/40 and 21/40; compare predictions and hashes, not only
 rounded accuracy. The owner bundle was re-evaluated on Linux/Python 3.12.14 with
 CPU PyTorch 2.12.1: all 80 saved trial labels matched. The small cross-platform
 probability differences are recorded in the reproduction receipt. The bundle's
-public release upload is pending; code-only clones still lack the assets.
+[public release](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1) includes the assets; download and restore
+them before running a recipe from a code-only clone.
 
 The supported adapter writes under `results/reproduced_two_link/` and refuses an
 existing evaluation directory. For another run:

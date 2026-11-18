@@ -1,11 +1,12 @@
 # TriCSI reproducibility bundle v1
 
-Prepared asset: `TriCSI-reproduction-v1.zip`
+Published asset: [TriCSI-reproduction-v1.zip](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1)
 
 - Archive size: 246,014,376 bytes.
 - Manifest files: 2,018; all hashes verified after receipt.
 - SHA-256: `8a394293c8a52ab53acbcdf00124c7eab5616828d166db3c18c4aa4f9653661d`
-- Status: received and verified; GitHub release upload pending authenticated access.
+- Status: published; GitHub reports matching upload size and SHA-256.
+- Release tag: `reproducibility-v1`; code commit: `86d91a54b88160c81928c3c6daea00e98374425f`.
 
 ## Contents
 
@@ -45,4 +46,4 @@ The complete firmware build and physical setup records are not in this bundle.
 The current environment capture does not prove all older training environments.
 S8/S9 have informed extension development, so new selected scores on them are
 development results. No code/data license has yet been selected by the owner;
-this release preparation does not invent a reuse grant.
+this release does not invent a reuse grant.

@@ -6,13 +6,12 @@ Research source, original parser/network implementations, matched experiment
 code, schema/split documentation, migration hashes, synthetic checks, actual
 owner-supplied metric tables, and real-data saved-model reproduction receipts.
 The complete owner bundle was received and all 2,018 file checksums verified.
-Its release attachment is pending; see `metadata/assets.json` for the exact
-archive size/hash and download status.
+It is [published as a release asset](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1);
+GitHub's uploaded size and SHA-256 match the original. See `metadata/assets.json`
+for the exact archive size/hash and download URL.
 
 ## Still needed for the full reproducibility release
 
-- Public hosting of the received recordings, original frozen models and full
-  result directories in the verified bundle.
 - Confirmation that the captured current working environment matches the
   environment used for each older training run. The supplied actual pip freeze
   and Windows/Python details are recorded in `metadata`.
@@ -22,8 +21,8 @@ archive size/hash and download status.
   The recovered packet-timing note in `archive/starter` is not the full firmware.
 - Confirmation of historical seed/epoch settings when available.
 
-The public code alone still lacks the raw/model download. Using the uploaded
-bundle, the original fitted models were re-evaluated without fitting and all 180
+The source checkout requires the separate release bundle for raw data/models.
+Using that bundle, the original fitted models were re-evaluated without fitting and all 180
 compared trial labels matched their stored predictions. This validates saved-model
 reproduction on those recordings, not model retraining or a new recording study.
 

@@ -2,7 +2,7 @@
 
 | File | Meaning |
 | --- | --- |
-| [assets.json](assets.json) | Required measurements/checkpoints and publication status; no invented download URLs |
+| [assets.json](assets.json) | Published bundle URL, upload checksum, release commit and required assets |
 | [sessions.json](sessions.json) | Roles, calibration and scoring rules |
 | [engine_hashes.json](engine_hashes.json) | Preserved public engine bytes; not hashes of the owner's raw data/models |
 | [migration.json](migration.json) | Old path → new path, with unchanged moved-file hashes |

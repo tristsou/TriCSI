@@ -4,7 +4,7 @@
 
 The owner supplied `TriCSI-reproduction-v1.zip`: 2,018 files, 246,014,376 bytes,
 with all per-file checksums verified. Raw data, models, caches and outputs are in
-the bundle, but its GitHub release attachment remains pending. See
+the [published release bundle](https://github.com/tristsou/TriCSI/releases/tag/reproducibility-v1). See
 [asset status](../metadata/assets.json) and the
 [complete manifest](../metadata/reproduction_bundle_manifest.json).
 The original two-link and primary/outer three-link fitted models were re-evaluated
